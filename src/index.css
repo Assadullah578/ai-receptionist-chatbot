@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+/* Styles live inside the shadow root, so :host is our "root". */
+:host {
+  all: initial;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
