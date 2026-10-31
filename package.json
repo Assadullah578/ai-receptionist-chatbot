@@ -9,13 +9,15 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "server": "node --watch --env-file=.env server/index.js",
-    "whatsapp:template": "node --env-file=.env server/create-whatsapp-template.js"
+    "whatsapp:template": "node --env-file=.env server/create-whatsapp-template.js",
+    "start": "node server/index.js"
   },
   "dependencies": {
     "@google/genai": "^2.32.0",
     "@tailwindcss/vite": "^4.3.3",
     "cors": "^2.8.6",
     "express": "^5.3.0",
+    "express-rate-limit": "^8.7.2",
     "mysql2": "^3.24.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -30,5 +32,8 @@
     "oxlint": "^1.89.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.5"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

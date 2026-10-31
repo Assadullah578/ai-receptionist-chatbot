@@ -2,9 +2,12 @@ import mysql from 'mysql2/promise'
 
 export const db = mysql.createPool({
   host: process.env.DB_HOST,
+  port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
+  // Cloud databases need an encrypted connection using their CA certificate.
+  ssl: process.env.DB_CA_CERT ? { ca: process.env.DB_CA_CERT } : undefined,
   dateStrings: true, // return dates as "2026-10-30" instead of JS Date objects
 })
 

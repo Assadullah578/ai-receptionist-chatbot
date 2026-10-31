@@ -96,7 +96,8 @@ export default function AdminApp() {
   const upcoming = appointments.filter((a) => a.status === 'booked' && a.date >= today)
 
   return (
-    <div className="mx-auto max-w-6xl p-4 text-sm text-slate-800 sm:p-8">
+    // On larger screens the page fits the window and only the table scrolls.
+    <div className="mx-auto flex max-w-6xl flex-col p-4 text-sm text-slate-800 sm:h-dvh sm:p-8">
       <header className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{config.name}</h1>
@@ -125,7 +126,7 @@ export default function AdminApp() {
         ))}
       </nav>
 
-      <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div className="table-scroll min-h-0 overflow-auto rounded-2xl shadow-sm ring-1 ring-slate-200">
         {tab === 'Appointments' && (
           <Table headers={['Date', 'Time', 'Patient', 'Phone', 'Service', 'Status', '']} empty={appointments.length === 0}>
             {appointments.map((a) => (
@@ -199,7 +200,7 @@ function Table({ headers, empty, children }: { headers: string[]; empty: boolean
   if (empty) return <p className="p-8 text-center text-slate-400">Nothing here yet.</p>
   return (
     <table className="w-full text-left">
-      <thead className="bg-slate-50 text-xs text-slate-500 uppercase">
+      <thead className="sticky top-0 bg-slate-50 text-xs text-slate-500 uppercase">
         <tr>
           {headers.map((h) => (
             <th key={h} className="px-4 py-3 font-medium">

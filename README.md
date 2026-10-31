@@ -27,6 +27,12 @@ An AI receptionist for a dental clinic (demo: "BrightSmile Dental") that any web
 
 To add the chatbot to a website, put `<script src="chatbot.js"></script>` just before `</body>`.
 
+## Deploying
+
+One Node.js server hosts everything: the API, the widget (`/chatbot.js`), the dashboard (`/admin`) and the demo clinic page (`/`). `render.yaml` sets this up on Render. It needs a cloud MySQL database, connected with the `DB_*` settings, including `DB_CA_CERT` for encrypted connections. Set `TZ` to the clinic's time zone.
+
+To add the chatbot to a website, use `<script src="https://YOUR-SERVER/chatbot.js"></script>`.
+
 ## Using it for another business
 
 - `server/clinic.js`: name, contact details, hours, services, prices and FAQs

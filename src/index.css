@@ -5,3 +5,52 @@
   all: initial;
   font-family: ui-sans-serif, system-ui, sans-serif;
 }
+
+/* Slim rounded scrollbars for the widget and the dashboard. The widget's copy stays inside its Shadow DOM. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* The transparent border leaves a gap around the thumb, so it looks thinner and floats. */
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1 padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: #0d9488;
+}
+
+/* Dashboard tables: start the scrollbar below the sticky header row (40px tall),
+   and carry the header's colour across the gap above the scrollbar. */
+.table-scroll {
+  background: linear-gradient(#f8fafc 40px, #fff 40px);
+}
+
+.table-scroll::-webkit-scrollbar-track:vertical {
+  margin-top: 40px;
+  margin-bottom: 6px;
+}
+
+/* Firefox doesn't support the rules above. */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+}

@@ -1,0 +1,36 @@
+# Render blueprint. Render asks for the values marked "sync: false" when you create the service.
+services:
+  - type: web
+    name: ai-receptionist-chatbot
+    runtime: node
+    plan: free
+    # NODE_ENV is production on Render, but the build needs the dev dependencies too.
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    envVars:
+      - key: TZ
+        value: Asia/Karachi # the clinic's time zone, used for "today" and free times
+      - key: WHATSAPP_TEMPLATE
+        value: appointment_confirmation
+      - key: WHATSAPP_COUNTRY_CODE
+        value: "92"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_CA_CERT
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false

@@ -1,12 +1,26 @@
+import path from 'node:path'
 import cors from 'cors'
 import express from 'express'
+import rateLimit from 'express-rate-limit'
 import { getReply } from './ai.js'
 import { clinic } from './clinic.js'
 import { createTables, db } from './db.js'
 
 const app = express()
+app.set('trust proxy', 1) // the host's proxy tells us each visitor's real IP
 app.use(cors())
 app.use(express.json())
+
+// Stop one visitor from using up the AI quota or guessing the admin password.
+const limit = (perMinute) => rateLimit({ windowMs: 60_000, limit: perMinute, message: { error: 'Too many requests. Please wait a minute.' } })
+app.use('/api/threads', limit(20))
+app.use('/api/admin', limit(60))
+
+// The demo clinic website, the widget (dist/chatbot.js) and the dashboard (dist/admin).
+const root = path.resolve(import.meta.dirname, '..')
+app.use(express.static(path.join(root, 'server/public')))
+app.use(express.static(path.join(root, 'dist')))
+app.get('/admin', (req, res) => res.redirect('/admin/admin.html'))
 
 const GREETING = `Hi! 👋 I'm the virtual receptionist at ${clinic.name}. I can answer questions or book an appointment for you. How can I help?`
 
