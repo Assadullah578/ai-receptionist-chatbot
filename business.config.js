@@ -8,21 +8,21 @@
 
 // ---------- The business ----------
 export const business = {
-  name: 'BrightSmile Dental',
-  description: 'a family dental clinic', // finishes the sentence "BrightSmile Dental is ..."
-  phone: '(555) 123-4567',
-  email: 'hello@brightsmile.example',
-  address: '123 Maple Avenue, Springfield',
+  name: 'IronPeak Gym',
+  description: 'a friendly neighborhood gym', // finishes the sentence "IronPeak Gym is ..."
+  phone: '(555) 987-6543',
+  email: 'hello@ironpeak.example',
+  address: '45 Summit Road, Springfield',
 
   // Opening hours. Use 24-hour times. Set a day to null when closed.
   hours: {
-    monday: ['09:00', '17:00'],
-    tuesday: ['09:00', '17:00'],
-    wednesday: ['09:00', '17:00'],
-    thursday: ['09:00', '19:00'],
-    friday: ['09:00', '17:00'],
-    saturday: ['09:00', '13:00'],
-    sunday: null,
+    monday: ['06:00', '22:00'],
+    tuesday: ['06:00', '22:00'],
+    wednesday: ['06:00', '22:00'],
+    thursday: ['06:00', '22:00'],
+    friday: ['06:00', '22:00'],
+    saturday: ['08:00', '20:00'],
+    sunday: ['08:00', '18:00'],
   },
 }
 
@@ -34,52 +34,55 @@ export const features = {
 }
 
 export const booking = {
-  slotMinutes: 30, // length of each booking; one booking can be made per time slot
+  slotMinutes: 60, // length of each booking; one booking can be made per time slot
 }
 
 // ---------- The words for this kind of business ----------
-// Examples: a gym might use "class", "classes", "member", "class", "classes".
+// Examples: a clinic might use "appointment", "appointments", "patient", "service", "services".
 export const labels = {
-  booking: 'appointment',
-  bookings: 'appointments',
-  customer: 'patient',
-  service: 'service',
-  services: 'services',
+  booking: 'session',
+  bookings: 'sessions',
+  customer: 'member',
+  service: 'session type',
+  services: 'session types',
 }
 
 // ---------- Services or products ----------
 // These appear as cards in the chat and are the only things that can be booked.
 export const services = [
-  { name: 'Check-up & Cleaning', price: '$120', icon: '🪥', description: 'Exam, X-rays and professional cleaning' },
-  { name: 'Teeth Whitening', price: '$350', icon: '✨', description: 'In-office whitening, up to 8 shades brighter' },
-  { name: 'Filling', price: 'from $150', icon: '🦷', description: 'Tooth-colored fillings for cavities' },
-  { name: 'Root Canal', price: 'from $700', icon: '🩺', description: 'Treatment to save an infected tooth' },
-  { name: 'Dental Implant Consultation', price: 'Free', icon: '🔩', description: 'Find out if implants are right for you' },
-  { name: 'Braces / Invisalign Consultation', price: 'Free', icon: '😁', description: 'Options for straightening your teeth' },
-  { name: 'Emergency Visit', price: '$90', icon: '🚑', description: 'Same-day care for pain or injury' },
+  { name: 'Free Gym Tour', price: 'Free', icon: '👋', description: 'See the gym and meet the team' },
+  { name: 'Personal Training', price: '$60', icon: '💪', description: 'One-on-one session with a certified trainer' },
+  { name: 'Fitness Assessment', price: '$35', icon: '📋', description: 'Check your starting point and set goals' },
+  { name: 'Nutrition Consultation', price: '$45', icon: '🥗', description: 'General healthy eating guidance from a coach' },
+  { name: 'Private Yoga Session', price: '$50', icon: '🧘', description: 'One-on-one yoga for flexibility and balance' },
+  { name: 'Boxing Coaching', price: '$55', icon: '🥊', description: 'One-on-one technique and conditioning' },
 ]
 
 // ---------- What the AI knows ----------
 // The AI answers only from this information, so add anything customers often ask.
 export const knowledge = [
-  'Parking: free parking behind the building.',
-  'Insurance accepted: Delta Dental, Cigna, Aetna, MetLife, Guardian.',
-  'New patients are welcome. Please arrive 10 minutes early to fill in a short form.',
-  'Payment by card, cash, or insurance. 0% payment plans are available for treatments over $500.',
-  'Children are seen from age 3.',
-  'Cancellations need 24 hours notice.',
+  'Memberships: Basic $30 a month (gym floor only), Plus $45 a month (gym floor and group classes), Premium $70 a month (everything, plus one personal training session each month).',
+  'There is no joining fee. Memberships can be cancelled with 30 days notice.',
+  'Day pass: $12.',
+  'Group classes are included with Plus and Premium memberships: Yoga, HIIT, Spin and Boxing. Ask the front desk for the weekly timetable.',
+  'Facilities: free weights, cardio machines, a functional training area, showers and lockers.',
+  'Bring a towel and a padlock for the lockers.',
+  'Free parking is available in front of the building.',
+  'Members must be at least 16 years old. Ages 14 and 15 can join with a parent or guardian.',
+  'Sessions can be cancelled free of charge with 24 hours notice.',
 ]
 
 // ---------- How the AI behaves ----------
 export const assistant = {
-  role: 'AI receptionist',
-  greeting: `Hi! 👋 I'm the virtual receptionist at ${business.name}. I can answer questions or book an appointment for you. How can I help?`,
-  style: 'Warm and short (1 to 3 sentences, or a short list). Plain language.',
+  role: 'AI gym assistant',
+  greeting: `Hey! 💪 I'm the virtual assistant at ${business.name}. I can tell you about memberships or book a session for you. How can I help?`,
+  style: 'Upbeat, encouraging and short (1 to 3 sentences, or a short list). Plain language.',
 
   // Rules specific to this business. Important safety rules belong here.
   rules: [
-    'Never diagnose, give medical advice, or recommend medicine. For symptoms, suggest booking a visit.',
-    `For severe pain, swelling, bleeding or a knocked-out tooth, tell them to call the clinic now at ${business.phone} (or 911 if it is life-threatening), and offer an Emergency Visit.`,
+    'Never give medical advice, diagnose injuries, or recommend medication, supplements or specific diets. Suggest speaking to a doctor about injuries or health conditions.',
+    'If someone describes chest pain, trouble breathing, fainting or a serious injury, tell them to stop exercising and call 911 right away.',
+    'Group classes are not booked through this chat. Membership sign-ups are handled by the team, so offer a callback or a Free Gym Tour.',
   ],
 }
 
@@ -87,31 +90,31 @@ export const assistant = {
 export const widget = {
   // Colours as hex codes.
   colors: {
-    primary: '#0d9488', // buttons, your messages, links
-    primaryDark: '#0f766e', // hover states and prices
-    primaryLight: '#f0fdfa', // soft backgrounds
-    gradientEnd: '#0891b2', // second colour in the header and chat button
+    primary: '#ea580c', // buttons, your messages, links
+    primaryDark: '#c2410c', // hover states and prices
+    primaryLight: '#fff7ed', // soft backgrounds
+    gradientEnd: '#dc2626', // second colour in the header and chat button
   },
 
-  icon: '🦷', // shown in the chat header
+  icon: '🏋️', // shown in the chat header
   launcherIcon: '💬', // shown on the round chat button
-  subtitle: 'AI receptionist · replies instantly',
-  teaser: '👋 Need a dental appointment? I can book it for you.', // bubble shown after a few seconds
-  quickReplies: ['Book an appointment', 'Our services', 'Opening hours', 'Do you accept my insurance?'],
+  subtitle: 'AI gym assistant · replies instantly',
+  teaser: '💪 Ready to start? I can book your free gym tour.', // bubble shown after a few seconds
+  quickReplies: ['Book a free tour', 'Sessions & prices', 'Membership plans', 'Opening hours'],
   inputPlaceholder: 'Type your message...',
-  disclaimer: `AI assistant, not medical advice. Emergency? Call ${business.phone}`,
+  disclaimer: `AI assistant, not medical advice. Questions? Call ${business.phone}`,
 
   // The button on each service card, and the message it sends. {service} is the service's name.
   serviceButton: 'Book',
   serviceMessage: "I'd like to book {service}.",
 
-  bookedTitle: 'Appointment booked',
+  bookedTitle: 'Session booked',
 
   // The form that collects a visitor's details.
   contactForm: {
     title: 'Your details',
     nameLabel: 'Full name',
-    namePlaceholder: 'Jane Smith',
+    namePlaceholder: 'Alex Morgan',
     phoneLabel: 'WhatsApp number',
     phonePlaceholder: '+1 555 000 0000',
     phoneHint: "Include your country code. We'll send your confirmation on WhatsApp.",
@@ -121,7 +124,7 @@ export const widget = {
 
 // ---------- WhatsApp booking confirmation ----------
 export const whatsapp = {
-  template: 'appointment_confirmation', // the template's name in Meta
+  template: 'gym_session_confirmation', // the template's name in Meta
   language: 'en', // the template's language in Meta
 
   // Used when creating the template with `npm run whatsapp:template`.
@@ -132,16 +135,16 @@ export const whatsapp = {
 
 // ---------- Admin dashboard ----------
 export const dashboard = {
-  subtitle: 'AI receptionist dashboard',
+  subtitle: 'AI gym assistant dashboard',
 }
 
 // ---------- Demo website (the page at "/") ----------
 export const website = {
-  title: 'BrightSmile Dental | AI Receptionist Demo',
-  notice: "Portfolio demo: BrightSmile Dental is a fictional clinic. Please don't enter real personal or medical information.",
-  headline: 'Gentle dental care for your whole family',
-  subheadline: 'Check-ups, whitening, fillings and more, with a friendly team that makes every visit easy.',
-  hint: '💬 Try the AI receptionist in the corner: ask a question or book a visit',
-  servicesSubtitle: 'Clear prices, no surprises.',
-  footer: 'A fictional clinic created to demonstrate an AI receptionist chatbot.',
+  title: 'IronPeak Gym | AI Assistant Demo',
+  notice: "Portfolio demo: IronPeak Gym is a fictional gym. Please don't enter real personal or health information.",
+  headline: 'Stronger starts here',
+  subheadline: 'Modern equipment, expert trainers and a community that keeps you going.',
+  hint: '💬 Try the AI assistant in the corner: ask about memberships or book a session',
+  servicesSubtitle: 'One-on-one sessions with our team.',
+  footer: 'A fictional gym created to demonstrate an AI assistant chatbot.',
 }
