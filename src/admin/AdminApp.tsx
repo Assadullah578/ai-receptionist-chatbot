@@ -1,14 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import MessageBubble from '../components/MessageBubble'
-import { config } from '../config'
-import { formatDate, formatTime } from '../format'
+import { apiUrl, business, dashboard, features, labels } from '../config'
+import { capitalize, formatDate, formatTime } from '../format'
 
 type Appointment = { id: number; thread_id: number | null; name: string; phone: string; service: string; date: string; time: string; status: 'booked' | 'cancelled' }
 type Lead = { id: number; thread_id: number | null; name: string; contact: string; reason: string; created_at: string }
 type Thread = { id: number; created_at: string; message_count: number; first_message: string }
 type ChatMessage = { id: number; role: 'user' | 'assistant'; content: string }
 
-const TABS = ['Appointments', 'Leads', 'Conversations'] as const
+const BOOKINGS_TAB = capitalize(labels.bookings)
+const TABS = [features.booking && BOOKINGS_TAB, features.contactRequests && 'Leads', 'Conversations'].filter((tab) => tab !== false)
 
 // Remember the password for this browser tab only.
 function savedPassword() {
@@ -20,7 +21,7 @@ function savedPassword() {
 }
 
 async function adminFetch(path: string, password: string, options: RequestInit = {}) {
-  const res = await fetch(`${config.apiUrl}/admin${path}`, {
+  const res = await fetch(`${apiUrl}/admin${path}`, {
     ...options,
     headers: { 'Content-Type': 'application/json', 'x-admin-password': password },
   })
@@ -33,7 +34,7 @@ export default function AdminApp() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [checking, setChecking] = useState(Boolean(password)) // checking a saved password on page load
   const [error, setError] = useState('')
-  const [tab, setTab] = useState<(typeof TABS)[number]>('Appointments')
+  const [tab, setTab] = useState(TABS[0])
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [leads, setLeads] = useState<Lead[]>([])
   const [threads, setThreads] = useState<Thread[]>([])
@@ -78,16 +79,16 @@ export default function AdminApp() {
   if (!loggedIn) {
     return (
       <form onSubmit={login} className="mx-auto mt-32 flex w-80 flex-col gap-3 rounded-2xl bg-white p-6 text-sm shadow">
-        <h1 className="text-lg font-semibold">{config.name} admin</h1>
+        <h1 className="text-lg font-semibold">{business.name} admin</h1>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Admin password"
-          className="rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-teal-500"
+          className="rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-brand"
         />
         {error && <p className="text-red-600">{error}</p>}
-        <button className="cursor-pointer rounded-lg bg-teal-600 py-2 font-medium text-white hover:bg-teal-700">Log in</button>
+        <button className="cursor-pointer rounded-lg bg-brand py-2 font-medium text-white hover:bg-brand-dark">Log in</button>
       </form>
     )
   }
@@ -100,8 +101,8 @@ export default function AdminApp() {
     <div className="mx-auto flex max-w-6xl flex-col p-4 text-sm text-slate-800 sm:h-dvh sm:p-8">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">{config.name}</h1>
-          <p className="text-slate-500">AI receptionist dashboard</p>
+          <h1 className="text-2xl font-semibold">{business.name}</h1>
+          <p className="text-slate-500">{dashboard.subtitle}</p>
         </div>
         <button onClick={() => load()} className="cursor-pointer rounded-lg bg-white px-4 py-2 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50">
           ↻ Refresh
@@ -109,8 +110,8 @@ export default function AdminApp() {
       </header>
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <Stat label="Upcoming appointments" value={upcoming.length} />
-        <Stat label="Callback requests" value={leads.length} />
+        {features.booking && <Stat label={`Upcoming ${labels.bookings}`} value={upcoming.length} />}
+        {features.contactRequests && <Stat label="Callback requests" value={leads.length} />}
         <Stat label="Conversations" value={threads.length} />
       </div>
 
@@ -119,7 +120,7 @@ export default function AdminApp() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`cursor-pointer rounded-full px-4 py-1.5 ${tab === t ? 'bg-teal-600 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'}`}
+            className={`cursor-pointer rounded-full px-4 py-1.5 ${tab === t ? 'bg-brand text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'}`}
           >
             {t}
           </button>
@@ -127,8 +128,8 @@ export default function AdminApp() {
       </nav>
 
       <div className="table-scroll min-h-0 overflow-auto rounded-2xl shadow-sm ring-1 ring-slate-200">
-        {tab === 'Appointments' && (
-          <Table headers={['Date', 'Time', 'Patient', 'Phone', 'Service', 'Status', '']} empty={appointments.length === 0}>
+        {tab === BOOKINGS_TAB && (
+          <Table headers={['Date', 'Time', capitalize(labels.customer), 'Phone', capitalize(labels.service), 'Status', '']} empty={appointments.length === 0}>
             {appointments.map((a) => (
               <tr key={a.id} className={`border-t border-slate-100 ${a.status === 'cancelled' ? 'text-slate-400' : ''}`}>
                 <td className="px-4 py-3">{formatDate(a.date)}</td>
@@ -191,7 +192,7 @@ function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
       <p className="text-slate-500">{label}</p>
-      <p className="mt-1 text-3xl font-semibold text-teal-700">{value}</p>
+      <p className="mt-1 text-3xl font-semibold text-brand-dark">{value}</p>
     </div>
   )
 }
@@ -216,7 +217,7 @@ function Table({ headers, empty, children }: { headers: string[]; empty: boolean
 
 function LinkButton({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className="ml-3 cursor-pointer text-teal-700 hover:underline">
+    <button onClick={onClick} className="ml-3 cursor-pointer text-brand-dark hover:underline">
       {children}
     </button>
   )

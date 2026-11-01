@@ -1,6 +1,9 @@
 // Sends WhatsApp messages with Meta's WhatsApp Cloud API.
 // Setup: https://developers.facebook.com/docs/whatsapp/cloud-api/get-started
-const { WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_TEMPLATE, WHATSAPP_COUNTRY_CODE } = process.env
+import { whatsapp } from '../business.config.js'
+import { formatDate, formatTime } from './business.js'
+
+const { WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_COUNTRY_CODE } = process.env
 
 export const whatsappEnabled = Boolean(WHATSAPP_TOKEN && WHATSAPP_PHONE_NUMBER_ID)
 if (!whatsappEnabled) console.warn('WhatsApp is not set up in .env, so booking confirmations will not be sent.')
@@ -11,17 +14,6 @@ function toWhatsAppNumber(phone) {
   if (phone.trim().startsWith('+')) return digits
   if (digits.startsWith('00')) return digits.slice(2)
   return `${WHATSAPP_COUNTRY_CODE ?? ''}${digits.replace(/^0/, '')}`
-}
-
-// "2026-11-05" -> "Thursday, November 5"
-function formatDate(date) {
-  return new Date(`${date}T00:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
-}
-
-// "14:30" -> "2:30 PM"
-function formatTime(time) {
-  const [hours, minutes] = time.split(':').map(Number)
-  return `${hours % 12 || 12}:${String(minutes).padStart(2, '0')} ${hours < 12 ? 'AM' : 'PM'}`
 }
 
 // WhatsApp only allows businesses to start a conversation with an approved template.
@@ -37,8 +29,8 @@ export async function sendBookingConfirmation({ name, phone, service, date, time
       to: toWhatsAppNumber(phone),
       type: 'template',
       template: {
-        name: WHATSAPP_TEMPLATE || 'appointment_confirmation',
-        language: { code: 'en' },
+        name: whatsapp.template,
+        language: { code: whatsapp.language },
         components: [
           {
             type: 'body',

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import ChatWindow from './components/ChatWindow'
-import { config } from './config'
+import { widget } from './config'
 
 export default function App() {
   const [open, setOpen] = useState(false)
@@ -26,7 +26,7 @@ export default function App() {
       {showTeaser && !started && (
         <div className="flex max-w-64 items-start gap-2 rounded-2xl rounded-br-sm bg-white p-3 shadow-lg ring-1 ring-slate-200">
           <button onClick={toggle} className="cursor-pointer text-left text-slate-700">
-            {config.teaser}
+            {widget.teaser}
           </button>
           <button onClick={() => setShowTeaser(false)} aria-label="Dismiss" className="cursor-pointer text-slate-400 hover:text-slate-600">
             ✕
@@ -37,9 +37,9 @@ export default function App() {
       <button
         onClick={toggle}
         aria-label={open ? 'Close chat' : 'Open chat'}
-        className={`${open ? 'max-sm:hidden' : ''} flex size-14 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 text-2xl text-white shadow-lg transition hover:scale-105`}
+        className={`${open ? 'max-sm:hidden' : ''} flex size-14 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-end text-2xl text-white shadow-lg transition hover:scale-105`}
       >
-        {open ? '✕' : '💬'}
+        {open ? '✕' : widget.launcherIcon}
       </button>
     </div>
   )

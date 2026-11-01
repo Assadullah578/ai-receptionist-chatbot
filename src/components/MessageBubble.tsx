@@ -1,13 +1,14 @@
 import Markdown from 'react-markdown'
 import type { Message } from '../api'
-import { formatDate, formatTime } from '../format'
+import { features, labels, widget } from '../config'
+import { capitalize, formatDate, formatTime } from '../format'
 import ServiceList from './ServiceList'
 
 // onSend lets cards inside the message send a chat message (left out in the admin dashboard).
 export default function MessageBubble({ message, onSend }: { message: Message; onSend?: (message: string) => void }) {
   if (message.role === 'user') {
     return (
-      <div className="max-w-[80%] self-end rounded-2xl rounded-br-sm bg-teal-600 px-3.5 py-2 whitespace-pre-wrap text-white">
+      <div className="max-w-[80%] self-end rounded-2xl rounded-br-sm bg-brand px-3.5 py-2 whitespace-pre-wrap text-white">
         {message.content}
       </div>
     )
@@ -23,7 +24,7 @@ export default function MessageBubble({ message, onSend }: { message: Message; o
             ol: ({ children }) => <ol className="mb-2 list-decimal space-y-1 pl-5 last:mb-0">{children}</ol>,
             strong: ({ children }) => <strong className="font-semibold text-slate-900">{children}</strong>,
             a: ({ children, href }) => (
-              <a href={href} target="_blank" rel="noreferrer" className="text-teal-700 underline">
+              <a href={href} target="_blank" rel="noreferrer" className="text-brand-dark underline">
                 {children}
               </a>
             ),
@@ -33,16 +34,16 @@ export default function MessageBubble({ message, onSend }: { message: Message; o
         </Markdown>
       </div>
 
-      {message.services && <ServiceList services={message.services} onBook={onSend} />}
+      {message.services && <ServiceList services={message.services} onBook={features.booking ? onSend : undefined} />}
 
       {message.appointment && (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5">
           <p className="mb-2 flex items-center gap-2 font-semibold text-emerald-800">
             <span className="flex size-5 items-center justify-center rounded-full bg-emerald-600 text-xs text-white">✓</span>
-            Appointment booked
+            {widget.bookedTitle}
           </p>
           <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-slate-700">
-            <dt className="text-slate-500">Service</dt>
+            <dt className="text-slate-500">{capitalize(labels.service)}</dt>
             <dd>{message.appointment.service}</dd>
             <dt className="text-slate-500">Date</dt>
             <dd>{formatDate(message.appointment.date)}</dd>

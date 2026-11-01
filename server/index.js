@@ -2,9 +2,10 @@ import path from 'node:path'
 import cors from 'cors'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
+import { assistant } from '../business.config.js'
 import { getReply } from './ai.js'
-import { clinic } from './clinic.js'
 import { createTables, db } from './db.js'
+import { demoPage } from './demo-page.js'
 
 const app = express()
 app.set('trust proxy', 1) // the host's proxy tells us each visitor's real IP
@@ -16,13 +17,11 @@ const limit = (perMinute) => rateLimit({ windowMs: 60_000, limit: perMinute, mes
 app.use('/api/threads', limit(20))
 app.use('/api/admin', limit(60))
 
-// The demo clinic website, the widget (dist/chatbot.js) and the dashboard (dist/admin).
-const root = path.resolve(import.meta.dirname, '..')
-app.use(express.static(path.join(root, 'server/public')))
-app.use(express.static(path.join(root, 'dist')))
+// The demo website, the widget (dist/chatbot.js) and the dashboard (dist/admin).
+app.get('/', (req, res) => res.send(demoPage()))
+app.use(express.static(path.resolve(import.meta.dirname, '../dist')))
 app.get('/admin', (req, res) => res.redirect('/admin/admin.html'))
 
-const GREETING = `Hi! 👋 I'm the virtual receptionist at ${clinic.name}. I can answer questions or book an appointment for you. How can I help?`
 
 // ---------- Chat widget ----------
 
@@ -31,12 +30,12 @@ app.post('/api/threads', async (req, res) => {
   const [result] = await db.query('INSERT INTO threads () VALUES ()')
   const threadId = result.insertId
 
-  await db.query('INSERT INTO messages (thread_id, role, content) VALUES (?, ?, ?)', [threadId, 'assistant', GREETING])
+  await db.query('INSERT INTO messages (thread_id, role, content) VALUES (?, ?, ?)', [threadId, 'assistant', assistant.greeting])
 
-  res.json({ threadId, messages: [{ role: 'assistant', content: GREETING }] })
+  res.json({ threadId, messages: [{ role: 'assistant', content: assistant.greeting }] })
 })
 
-// Send a message and get the receptionist's reply.
+// Send a message and get the AI's reply.
 app.post('/api/threads/:threadId/messages', async (req, res) => {
   const { threadId } = req.params
   const content = req.body.content?.trim()

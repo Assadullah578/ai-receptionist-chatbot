@@ -1,6 +1,6 @@
 # AI Receptionist Chatbot
 
-An AI receptionist for a dental clinic (demo: "BrightSmile Dental") that any website can add with one `<script>` tag. It answers questions from the clinic's own information, books appointments, takes callback requests, and gives the clinic an admin dashboard.
+A configurable AI chatbot that any website can add with one `<script>` tag, shown here as a receptionist for a demo dental clinic ("BrightSmile Dental"). It answers questions from the business's own information, takes bookings and callback requests, and comes with an admin dashboard.
 
 **Stack:** React, TypeScript, Tailwind CSS, Shadow DOM (widget), Node.js + Express, MySQL, Google Gemini (function calling).
 
@@ -35,5 +35,13 @@ To add the chatbot to a website, use `<script src="https://YOUR-SERVER/chatbot.j
 
 ## Using it for another business
 
-- `server/clinic.js`: name, contact details, hours, services, prices and FAQs
-- `src/config.ts`: text shown in the widget
+Everything specific to the business is in one file, [business.config.js](business.config.js):
+
+- Business details, opening hours, services and prices
+- What the AI knows, its role, greeting, style and rules
+- Which features are on: service cards, booking, callback requests
+- Words like "appointment" and "patient", so it fits any industry
+- Widget colours, icons, quick replies and all form text
+- WhatsApp template, dashboard text and the demo website
+
+Change that file, restart the server (or redeploy), and the chatbot becomes a different business.

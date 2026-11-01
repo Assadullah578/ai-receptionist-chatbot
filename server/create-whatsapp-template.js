@@ -1,10 +1,10 @@
 // Creates the WhatsApp booking confirmation template, then shows its status. Run once:
 //   npm run whatsapp:template
 // Use this instead of WhatsApp Manager's Message templates page. Meta must approve the template before messages can be sent.
-import { clinic } from './clinic.js'
+import { services, whatsapp } from '../business.config.js'
 
-const { WHATSAPP_TOKEN, WHATSAPP_BUSINESS_ACCOUNT_ID, WHATSAPP_TEMPLATE } = process.env
-const name = WHATSAPP_TEMPLATE || 'appointment_confirmation'
+const { WHATSAPP_TOKEN, WHATSAPP_BUSINESS_ACCOUNT_ID } = process.env
+const name = whatsapp.template
 const url = `https://graph.facebook.com/v23.0/${WHATSAPP_BUSINESS_ACCOUNT_ID}/message_templates`
 const headers = { Authorization: `Bearer ${WHATSAPP_TOKEN}`, 'Content-Type': 'application/json' }
 
@@ -18,13 +18,13 @@ const created = await fetch(url, {
   headers,
   body: JSON.stringify({
     name,
-    language: 'en',
+    language: whatsapp.language,
     category: 'UTILITY',
     components: [
       {
         type: 'BODY',
-        text: `Hi {{1}}, your {{2}} at ${clinic.name} is confirmed for {{3}} at {{4}}. Call ${clinic.phone} if you need to reschedule.`,
-        example: { body_text: [['Emma Wilson', 'Teeth Whitening', 'Wednesday, November 11', '10:00 AM']] },
+        text: whatsapp.message,
+        example: { body_text: [['Emma Wilson', services[0]?.name ?? 'Booking', 'Wednesday, November 11', '10:00 AM']] },
       },
     ],
   }),

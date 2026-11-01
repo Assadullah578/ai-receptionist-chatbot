@@ -10,8 +10,6 @@ services:
     envVars:
       - key: TZ
         value: Asia/Karachi # the clinic's time zone, used for "today" and free times
-      - key: WHATSAPP_TEMPLATE
-        value: appointment_confirmation
       - key: WHATSAPP_COUNTRY_CODE
         value: "92"
       - key: DB_HOST

@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Default brand colours. The real values come from business.config.js (see applyColors in config.ts). */
+@theme {
+  --color-brand: #0d9488;
+  --color-brand-dark: #0f766e;
+  --color-brand-light: #f0fdfa;
+  --color-brand-end: #0891b2;
+}
+
 /* Styles live inside the shadow root, so :host is our "root". */
 :host {
   all: initial;
@@ -33,7 +41,7 @@
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background-color: #0d9488;
+  background-color: var(--color-brand);
 }
 
 /* Dashboard tables: start the scrollbar below the sticky header row (40px tall),

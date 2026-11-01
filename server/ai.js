@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
-import { clinic, clinicInfoText, dayName, toDateString } from './clinic.js'
+import { assistant, business, features, labels } from '../business.config.js'
+import { businessInfoText, dayName, toDateString } from './business.js'
 import { runTool, toolDeclarations } from './tools.js'
 
 if (!process.env.GEMINI_API_KEY) console.warn('GEMINI_API_KEY is missing in .env, so the chatbot cannot reply.')
@@ -17,26 +18,35 @@ function systemPrompt() {
   const today = toDateString(now)
   const time = now.toTimeString().slice(0, 5)
 
-  return `You are the friendly AI receptionist for ${clinic.name}, chatting with visitors on the clinic's website.
+  // Only describe the features turned on in business.config.js.
+  const tasks = [
+    `Answer questions using only the business information below. If something isn't covered, say you're not sure and ${
+      features.contactRequests ? 'offer to have the team contact them (save_contact_request)' : `suggest calling ${business.phone}`
+    }.`,
+    features.services &&
+      `When the visitor asks what you offer or about prices in general${features.booking ? `, or wants a ${labels.booking} without saying which ${labels.service}` : ''}, call show_services.`,
+    ...(features.booking
+      ? [
+          `Book ${labels.bookings}. You need: ${labels.service}, date, time, full name and phone number. Ask for missing details one or two at a time.`,
+          `To get the visitor's name and phone number, call show_contact_form instead of asking for them in text. Do this once the ${labels.service}, date and time are chosen.`,
+          'Always call check_available_times before suggesting times, and offer 3 or 4 options instead of the full list.',
+          `When you have all the details, call make_booking. The first call does not book yet: it tells you to show the details and ask the ${labels.customer} to confirm. When they say yes, call it again with the same details. Never say a ${labels.booking} is booked until make_booking returns success.`,
+        ]
+      : []),
+    features.contactRequests &&
+      "If the visitor wants to talk to a person, has a complaint, or isn't ready to go ahead, offer a callback: get their name and phone with show_contact_form, then call save_contact_request.",
+  ].filter(Boolean)
+
+  return `You are the ${assistant.role} for ${business.name}, ${business.description}, chatting with visitors on the website.
 Today is ${dayName(today)}, ${today}. The time now is ${time}.
 
 What you do:
-- Answer questions using only the clinic information below. If something isn't covered, say you're not sure and offer to have the team contact them (save_contact_request).
-- When the visitor asks what you offer or about prices in general, or wants to book without saying which service, call show_services.
-- Book appointments. You need: service, date, time, full name and phone number. Ask for missing details one or two at a time.
-- To get the visitor's name and phone number, call show_contact_form instead of asking for them in text. Do this once the service, date and time are chosen.
-- Always call check_available_times before suggesting times, and offer 3 or 4 options instead of the full list.
-- When you have all the details, call book_appointment. The first call does not book yet: it tells you to show the details and ask the patient to confirm. When they say yes, call it again with the same details. Never say an appointment is booked until book_appointment returns success.
-- If the visitor wants to talk to a person, has a complaint, or isn't ready to book, offer a callback: get their name and phone with show_contact_form, then call save_contact_request.
+${tasks.map((task) => `- ${task}`).join('\n')}
+${assistant.rules.length > 0 ? `\nImportant rules:\n${assistant.rules.map((rule) => `- ${rule}`).join('\n')}\n` : ''}
+Style: ${assistant.style} Use **bold** only for key details like dates and times. Always write times like "2:30 PM", never in 24-hour format. Never invent prices, times or policies.
 
-Safety:
-- Never diagnose, give medical advice, or recommend medicine. For symptoms, suggest booking a visit.
-- For severe pain, swelling, bleeding or a knocked-out tooth, tell them to call the clinic now at ${clinic.phone} (or 911 if it is life-threatening), and offer an Emergency Visit.
-
-Style: warm and short (1 to 3 sentences, or a short list). Plain language. Use **bold** only for key details like dates and times. Write times like "2:30 PM". Never invent prices, times or policies.
-
-Clinic information:
-${clinicInfoText()}`
+Business information:
+${businessInfoText()}`
 }
 
 async function generate(contents) {
@@ -45,7 +55,10 @@ async function generate(contents) {
       return await ai.models.generateContent({
         model: MODELS[i],
         contents,
-        config: { systemInstruction: systemPrompt(), tools: [{ functionDeclarations: toolDeclarations }] },
+        config: {
+          systemInstruction: systemPrompt(),
+          tools: toolDeclarations.length > 0 ? [{ functionDeclarations: toolDeclarations }] : undefined,
+        },
       })
     } catch (error) {
       if (i === MODELS.length - 1) throw error
@@ -81,5 +94,5 @@ export async function getReply(messages, threadId) {
     contents.push({ role: 'user', parts: results })
   }
 
-  return { text: `Sorry, something went wrong. Please call us at ${clinic.phone}.`, widget: {} }
+  return { text: `Sorry, something went wrong. Please call us at ${business.phone}.`, widget: {} }
 }

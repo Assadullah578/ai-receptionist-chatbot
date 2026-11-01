@@ -1,49 +1,49 @@
-import { clinic, dayName, getSlots } from './clinic.js'
+import { business, features, labels, services } from '../business.config.js'
+import { dayName, getSlots } from './business.js'
 import { db } from './db.js'
 import { sendBookingConfirmation, whatsappEnabled } from './whatsapp.js'
 
 // The actions Gemini can take. It decides when to call them; runTool() does the work.
+// Features turned off in business.config.js are left out, so the AI can't use them.
 export const toolDeclarations = [
-  {
+  features.services && {
     name: 'show_services',
-    description:
-      'Show the clinic\'s services and prices as cards in the chat. Use it when the visitor asks what services you offer or about prices in general, or wants to book but has not picked a service.',
+    description: `Show the ${labels.services} and prices as cards in the chat. Use it when the visitor asks what you offer or about prices in general${features.booking ? `, or wants a ${labels.booking} but has not picked a ${labels.service}` : ''}.`,
     parametersJsonSchema: { type: 'object', properties: {} },
   },
-  {
+  features.booking && {
     name: 'check_available_times',
-    description: 'Get the free appointment times for one date. Always call this before suggesting or booking a time.',
+    description: `Get the free ${labels.booking} times for one date. Always call this before suggesting or booking a time.`,
     parametersJsonSchema: {
       type: 'object',
       properties: { date: { type: 'string', description: 'Date as YYYY-MM-DD' } },
       required: ['date'],
     },
   },
-  {
-    name: 'book_appointment',
-    description: 'Book an appointment. Only call this after the patient has confirmed all the details.',
+  features.booking && {
+    name: 'make_booking',
+    description: `Book a ${labels.booking}. Only call this after the ${labels.customer} has given all the details.`,
     parametersJsonSchema: {
       type: 'object',
       properties: {
-        name: { type: 'string', description: "Patient's full name" },
-        phone: { type: 'string', description: "Patient's phone number" },
-        service: { type: 'string', enum: clinic.services.map((s) => s.name) },
+        name: { type: 'string', description: `The ${labels.customer}'s full name` },
+        phone: { type: 'string', description: `The ${labels.customer}'s phone number` },
+        service: { type: 'string', enum: services.map((s) => s.name) },
         date: { type: 'string', description: 'Date as YYYY-MM-DD' },
         time: { type: 'string', description: 'Start time as HH:MM (24-hour), from check_available_times' },
       },
       required: ['service', 'date', 'time'],
     },
   },
-  {
+  (features.booking || features.contactRequests) && {
     name: 'show_contact_form',
     description:
-      'Show a form in the chat where the visitor types their name and phone number. Use it whenever you need their name and phone (to book or for a callback) instead of asking in text.',
+      'Show a form in the chat where the visitor types their name and phone number. Use it whenever you need their name and phone instead of asking in text.',
     parametersJsonSchema: { type: 'object', properties: {} },
   },
-  {
+  features.contactRequests && {
     name: 'save_contact_request',
-    description:
-      "Save the visitor's details so the clinic team can contact them. Use it when they want to talk to a person, have a question you cannot answer, or are not ready to book.",
+    description: `Save the visitor's details so the ${business.name} team can contact them. Use it when they want to talk to a person, have a question you cannot answer, or are not ready to go ahead.`,
     parametersJsonSchema: {
       type: 'object',
       properties: {
@@ -54,7 +54,7 @@ export const toolDeclarations = [
       required: ['name', 'contact', 'reason'],
     },
   },
-]
+].filter(Boolean)
 
 async function freeTimes(date) {
   const [booked] = await db.query("SELECT time FROM appointments WHERE date = ? AND status = 'booked'", [date])
@@ -64,8 +64,8 @@ async function freeTimes(date) {
 
 const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value ?? '')
 
-// Bookings waiting for the patient's "yes", by thread. The first book_appointment call only saves the details here,
-// so the patient always gets to confirm before anything is booked.
+// Bookings waiting for the customer's "yes", by thread. The first make_booking call only saves the details here,
+// so the customer always gets to confirm before anything is booked.
 const pendingBookings = new Map()
 
 // threadId: the conversation. turn: which user message is being answered.
@@ -74,8 +74,8 @@ const pendingBookings = new Map()
 export async function runTool(name, args, { threadId, turn }) {
   if (name === 'show_services') {
     return {
-      response: { shown: true, message: 'The services and prices are now shown as cards under your message (refer to them as "below"). Keep your text to one short sentence and do not repeat the list.' },
-      widget: { services: clinic.services },
+      response: { shown: true, message: 'The list and prices are now shown as cards under your message (refer to them as "below"). Keep your text to one short sentence and do not repeat the list.' },
+      widget: { services },
     }
   }
 
@@ -95,28 +95,28 @@ export async function runTool(name, args, { threadId, turn }) {
     return { response: { date: args.date, day: dayName(args.date), free_times: times } }
   }
 
-  if (name === 'book_appointment') {
-    const { name: patient, phone, service, date, time } = args
+  if (name === 'make_booking') {
+    const { name: customer, phone, service, date, time } = args
     // No name or phone yet: show the form, in case the AI forgot to call show_contact_form.
-    if (!patient?.trim() || !phone?.trim()) {
+    if (!customer?.trim() || !phone?.trim()) {
       return {
         response: { status: 'need_details', message: 'The name and phone form is now shown below your reply. Ask the visitor to fill it in.' },
         widget: { showContactForm: true },
       }
     }
-    if (!clinic.services.some((s) => s.name === service)) return { response: { error: 'Unknown service' } }
+    if (!services.some((s) => s.name === service)) return { response: { error: `Unknown ${labels.service}` } }
     if (!isDate(date)) return { response: { error: 'Date must be YYYY-MM-DD' } }
     if (!(await freeTimes(date)).includes(time)) return { response: { error: 'That time is not available. Check available times again.' } }
 
-    // Same details as last time and the patient has replied since then: book it. Otherwise ask them to confirm first.
-    const key = [patient.trim().toLowerCase(), phone.replace(/\D/g, ''), service, date, time].join('|')
+    // Same details as last time and the customer has replied since then: book it. Otherwise ask them to confirm first.
+    const key = [customer.trim().toLowerCase(), phone.replace(/\D/g, ''), service, date, time].join('|')
     const pending = pendingBookings.get(threadId)
     if (pending?.key !== key || pending.turn === turn) {
       pendingBookings.set(threadId, { key, turn })
       return {
         response: {
           status: 'not_booked_yet',
-          message: 'Show these details to the patient and ask them to confirm. After they say yes, call book_appointment again with the same details.',
+          message: `Show these details to the ${labels.customer} and ask them to confirm. After they say yes, call make_booking again with the same details.`,
         },
       }
     }
@@ -124,9 +124,9 @@ export async function runTool(name, args, { threadId, turn }) {
 
     const [result] = await db.query(
       'INSERT INTO appointments (thread_id, name, phone, service, date, time) VALUES (?, ?, ?, ?, ?, ?)',
-      [threadId, patient.trim(), phone.trim(), service, date, time],
+      [threadId, customer.trim(), phone.trim(), service, date, time],
     )
-    const appointment = { id: result.insertId, name: patient.trim(), service, date, time }
+    const appointment = { id: result.insertId, name: customer.trim(), service, date, time }
 
     // Send the WhatsApp confirmation in the background, so a WhatsApp problem never blocks the booking.
     sendBookingConfirmation({ ...appointment, phone: phone.trim() }).catch((error) =>
